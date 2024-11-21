@@ -17,7 +17,6 @@ import numpy as np
 import pandas as pd
 import requests
 import selenium
-import undetected_chromedriver as uc
 from dateutil.relativedelta import relativedelta
 from packaging import version
 from selenium.common.exceptions import JavascriptException, WebDriverException
@@ -590,34 +589,6 @@ class BaseSeleniumReader(BaseReader):
                 """,
                 e,
             )
-
-    def _init_webdriver(self) -> "uc.Chrome":
-        """Start the Selenium driver."""
-        # Quit existing driver
-        if hasattr(self, "_driver"):
-            self._driver.quit()
-        # Start a new driver
-        chrome_options = uc.ChromeOptions()
-        if self.headless:
-            print("Starting ChromeDriver in headless mode.", selenium.__version__)
-            if version.parse(selenium.__version__) >= version.parse("4.13.0"):
-                raise ValueError(
-                    "Headless mode is not supported for Selenium 4.13.0 and above. "
-                    "Please downgrade to a lower version of Selenium or set "
-                    "'headless=False'."
-                )
-            chrome_options.add_argument("--headless")
-        else:
-            chrome_options.headless = False
-        if self.path_to_browser is not None:
-            chrome_options.add_argument("--binary-location=" + str(self.path_to_browser))
-        proxy = self.proxy()
-        if len(proxy):
-            proxy_str = ";".join(f"{prot}={url}" for prot, url in proxy.items())
-            resolver_rules = "MAP * ~NOTFOUND , EXCLUDE 127.0.0.1"
-            chrome_options.add_argument("--proxy-server=" + proxy_str)
-            chrome_options.add_argument("--host-resolver-rules=" + resolver_rules)
-        return uc.Chrome(options=chrome_options)
 
     def _download_and_save(
         self,
